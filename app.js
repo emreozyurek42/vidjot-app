@@ -1,5 +1,6 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
+const methodOverride = require('method-override')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
@@ -18,6 +19,8 @@ app.set('view engine', 'handlebars');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+app.use(methodOverride('_method'));
 
 app.get('/', (req, res) => {
     const title = 'Welcome';
@@ -78,6 +81,28 @@ app.post('/ideas', (req, res) => {
             res.redirect('/ideas');
         })
    }
+});
+
+app.put('/ideas/:id', (req, res) => {
+    Idea.findOne({
+        _id: req.params.id
+    })
+    .then(idea => {
+        idea.title = req.body.title;
+        idea.details = req.body.details;
+
+        idea.save()
+        .then(idea => {
+            res.redirect('/ideas');
+        });
+    });
+});
+
+app.delete('/ideas/:id', (req, res) => {
+   Idea.remove({_id: req.params.id})
+   .then(() => {
+       res.redirect('/ideas');
+   });
 });
 
 const port = 5000;
